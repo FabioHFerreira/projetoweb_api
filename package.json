@@ -5,14 +5,15 @@
   "license": "MIT",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node-dev src/server.ts"
+    "dev": "ts-node-dev --respawn --transpile-only --clear src/server.ts",
+    "test": "jest"
   },
   "keywords": [],
   "author": "Ives van Hoorne",
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.16.4",
     "nodemon": "^3.1.5",
     "prisma": "^6.11.1",
@@ -22,6 +23,7 @@
   "dependencies": {
     "@prisma/client": "^6.11.1",
     "bcryptjs": "^3.0.2",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2"
   }
 }

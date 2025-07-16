@@ -1,36 +1,41 @@
-import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
+import { type Request, type Response, type NextFunction } from 'express'
+import jwt from 'jsonwebtoken'
 
 interface TokenPayload {
-  userId: string;
+  userId: string
 }
 
-export function authMiddleware(
+export function authMiddleware (
   req: Request,
   res: Response,
   next: NextFunction
-) {
-  const { authorization } = req.headers;
+): any {
+  const { authorization } = req.headers
 
-  if (!authorization) {
-    return res.status(401).json({ error: "Token não fornecido." });
+  if (
+    authorization === null ||
+    authorization === undefined ||
+    authorization === ''
+  ) {
+    return res.status(401).json({ error: 'Token não fornecido.' })
   }
 
-  const [, token] = authorization.split(" ");
+  const [, token] = authorization.split(' ')
 
   try {
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      throw new Error("A variável de ambiente JWT_SECRET não está definida.");
+    const jwtSecret = process.env.JWT_SECRET
+
+    if (jwtSecret === null || jwtSecret === undefined || jwtSecret === '') {
+      throw new Error('A variável de ambiente JWT_SECRET não está definida.')
     }
 
-    const data = jwt.verify(token, jwtSecret);
-    const { userId } = data as TokenPayload;
+    const data = jwt.verify(token, jwtSecret)
+    const { userId } = data as TokenPayload
 
-    req.userId = userId;
+    req.userId = userId
 
-    return next();
+    next()
   } catch (error) {
-    return res.status(401).json({ error: "Token inválido." });
+    return res.status(401).json({ error: 'Token inválido.' })
   }
 }

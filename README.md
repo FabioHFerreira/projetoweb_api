@@ -1,9 +1,3 @@
-MINHA-CHAVE-SECRETA-DE-ADMIN-123
-
-curl -X GET \
- -H "X-API-KEY: MINHA-CHAVE-SECRETA-DE-ADMIN-123" \
- https://yq9z3z-3333.csb.app/admin/users
-
 # Projeto de API - Análise e Desenvolvimento de Sistemas
 
 ## 1. Visão Geral

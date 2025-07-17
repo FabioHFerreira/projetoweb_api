@@ -1,10 +1,16 @@
+MINHA-CHAVE-SECRETA-DE-ADMIN-123
+
+curl -X GET \
+ -H "X-API-KEY: MINHA-CHAVE-SECRETA-DE-ADMIN-123" \
+ https://yq9z3z-3333.csb.app/admin/users
+
 # Projeto de API - Análise e Desenvolvimento de Sistemas
 
 ## 1. Visão Geral
 
 Este projeto consiste no desenvolvimento de uma API RESTful como parte da avaliação da disciplina de Programação Web. A aplicação foi construída em Node.js com TypeScript e implementa um sistema de cadastro e autenticação de usuários, seguindo as melhores práticas de desenvolvimento de software.
 
-O objetivo principal foi atender a todos os requisitos técnicos obrigatórios, incluindo o uso de um ORM para interação com o banco de dados, autenticação de rotas via JWT, documentação interativa com Swagger, testes automatizados e a implantação da aplicação em um ambiente de nuvem.
+O objetivo principal foi atender a todos os requisitos técnicos obrigatórios, incluindo o uso de um ORM para interação com o banco de dados, autenticação de rotas via JWT e API Key, documentação interativa com Swagger, testes automatizados e a implantação da aplicação em um ambiente de nuvem.
 
 ---
 
@@ -14,7 +20,8 @@ A API possui os seguintes endpoints:
 
 - `POST /users`: Cria um novo usuário no sistema.
 - `POST /login`: Autentica um usuário existente e retorna um token de acesso (JWT).
-- `GET /me`: Rota protegida que retorna as informações do usuário autenticado.
+- `GET /me`: Rota protegida que retorna as informações do usuário autenticado (requer token JWT).
+- `GET /admin/users`: Rota de administrador que retorna todos os usuários cadastrados (requer API Key).
 - `GET /api-docs`: Apresenta a documentação interativa da API via Swagger.
 
 ---
@@ -43,14 +50,15 @@ A construção deste projeto envolveu as seguintes tecnologias e ferramentas:
 
 - **Autenticação:**
 
-  - **JSON Web Tokens (JWT):** Para a criação de tokens de sessão e proteção de rotas.
+  - **JSON Web Tokens (JWT):** Para a criação de tokens de sessão e proteção de rotas de usuário.
+  - **API Key:** Para a proteção de rotas de administrador.
   - **bcrypt.js:** Para a criptografia de senhas (hashing).
 
 - **Testes e Qualidade de Código:**
 
   - **Jest:** Framework para a escrita de testes automatizados.
   - **Supertest:** Biblioteca para testar endpoints HTTP.
-  - **ESLint:** Ferramenta de linting para garantir a consistência e a qualidade do código.
+  - **ESLint:** Ferramenta de linting para garantir a consistência e a qualidade do código, utilizando o guia de estilo `Standard with TypeScript`.
 
 - **Documentação:**
 
@@ -87,6 +95,7 @@ Para executar o projeto em um ambiente local, siga os passos abaixo:
       ```
       DATABASE_URL="sua_url_de_conexao_com_o_postgresql"
       JWT_SECRET="sua_frase_secreta_para_o_jwt"
+      ADMIN_API_KEY="sua_chave_secreta_para_o_admin"
       ```
 
 4.  **Execute as migrações do banco de dados:**
@@ -101,3 +110,23 @@ Para executar o projeto em um ambiente local, siga os passos abaixo:
     ```
 
 O servidor estará disponível em `http://localhost:3333`.
+
+---
+
+## 6. Como Testar a API
+
+Os testes automatizados podem ser executados com o seguinte comando:
+
+```bash
+npm test
+```
+
+Para testar manualmente, você pode usar a documentação interativa ou uma ferramenta como o curl.
+Exemplo de teste da rota de admin com curl:
+
+```bash
+curl -X GET \
+  -H "X-API-KEY: [SUA-CHAVE-DE-ADMIN-AQUI]" \
+  https://projetoweb-api.onrender.com/admin/users
+
+```

@@ -5,11 +5,13 @@ import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "./swaggerConfig";
 import { authMiddleware } from "./middlewares/auth";
 import { apiKeyAuth } from "./middlewares/apiKeyAuth";
+import cors from "cors";
 
 export const app = express();
 const prisma = new PrismaClient();
 
 app.use(express.json());
+app.use(cors());
 
 /**
  * @swagger

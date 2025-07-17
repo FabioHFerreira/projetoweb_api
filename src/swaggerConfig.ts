@@ -11,8 +11,8 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: "https://yq9z3z-3333.csb.app",
-        description: "Servidor de Desenvolvimento (CodeSandbox )",
+        url: "https://projetoweb-api.onrender.com",
+        description: "Servidor de Desenvolvimento (Render)",
       },
     ],
     components: {

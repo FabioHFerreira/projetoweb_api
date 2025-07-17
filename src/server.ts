@@ -1,14 +1,15 @@
-import express, { type Request, type Response } from 'express'
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
-import swaggerUi from 'swagger-ui-express'
-import { swaggerSpec } from './swaggerConfig'
-import { authMiddleware } from './middlewares/auth'
+import express, { type Request, type Response } from "express";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./swaggerConfig";
+import { authMiddleware } from "./middlewares/auth";
+import { apiKeyAuth } from "./middlewares/apiKeyAuth";
 
-export const app = express()
-const prisma = new PrismaClient()
+export const app = express();
+const prisma = new PrismaClient();
 
-app.use(express.json())
+app.use(express.json());
 
 /**
  * @swagger
@@ -48,37 +49,68 @@ app.use(express.json())
  *       400:
  *         description: E-mail já está em uso
  */
-app.post('/users', async (request: Request, response: Response) => {
+/**
+ * @swagger
+ * /admin/users:
+ *   get:
+ *     summary: (Admin) Retorna uma lista de todos os usuários
+ *     tags: [Admin]
+ *     security:
+ *       - ApiKeyAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de usuários retornada com sucesso
+ *       401:
+ *         description: Não autorizado (API Key inválida)
+ */
+app.get(
+  "/admin/users",
+  apiKeyAuth,
+  async (request: Request, response: Response) => {
+    try {
+      const users = await prisma.user.findMany({
+        select: { id: true, nome: true, email: true, cargo: true }, // Nunca retornar senhas
+      });
+      return response.json(users);
+    } catch (error) {
+      return response
+        .status(500)
+        .json({ error: "Ocorreu um erro ao buscar os usuários." });
+    }
+  }
+);
+
+app.post("/users", async (request: Request, response: Response) => {
   try {
     // Desestruturando e tipando o corpo da requisição
     const { nome, email, senha, telefone } = request.body as {
-      nome: string
-      email: string
-      senha: string
-      telefone?: string
-    }
+      nome: string;
+      email: string;
+      senha: string;
+      telefone?: string;
+    };
 
     const userAlreadyExists = await prisma.user.findUnique({
-      where: { email }
-    })
+      where: { email },
+    });
 
     // Checagem explícita
     if (userAlreadyExists !== null) {
       return response
         .status(400)
-        .json({ error: 'Este e-mail já está em uso.' })
+        .json({ error: "Este e-mail já está em uso." });
     }
 
-    const hashedPassword = await bcrypt.hash(senha, 8)
+    const hashedPassword = await bcrypt.hash(senha, 8);
 
     const user = await prisma.user.create({
       data: {
         nome,
         email,
         senha: hashedPassword,
-        telefone
-      }
-    })
+        telefone,
+      },
+    });
 
     const userWithoutPassword = {
       id: user.id,
@@ -86,16 +118,16 @@ app.post('/users', async (request: Request, response: Response) => {
       email: user.email,
       cargo: user.cargo,
       telefone: user.telefone,
-      createdAt: user.createdAt
-    }
+      createdAt: user.createdAt,
+    };
 
-    return response.status(201).json(userWithoutPassword)
+    return response.status(201).json(userWithoutPassword);
   } catch (error) {
     return response
       .status(500)
-      .json({ error: 'Ocorreu um erro ao criar o usuário.' })
+      .json({ error: "Ocorreu um erro ao criar o usuário." });
   }
-})
+});
 
 /**
  * @swagger
@@ -129,42 +161,42 @@ app.post('/users', async (request: Request, response: Response) => {
  *       401:
  *         description: E-mail ou senha inválidos
  */
-app.post('/login', async (request: Request, response: Response) => {
+app.post("/login", async (request: Request, response: Response) => {
   try {
-    const { email, senha } = request.body as { email: string, senha: string }
+    const { email, senha } = request.body as { email: string; senha: string };
 
     const user = await prisma.user.findUnique({
-      where: { email }
-    })
+      where: { email },
+    });
 
     // Checagem explícita
     if (user === null) {
-      return response.status(401).json({ error: 'E-mail ou senha inválidos.' })
+      return response.status(401).json({ error: "E-mail ou senha inválidos." });
     }
 
-    const isPasswordValid = await bcrypt.compare(senha, user.senha)
+    const isPasswordValid = await bcrypt.compare(senha, user.senha);
 
     if (!isPasswordValid) {
-      return response.status(401).json({ error: 'E-mail ou senha inválidos.' })
+      return response.status(401).json({ error: "E-mail ou senha inválidos." });
     }
 
-    const jwtSecret = process.env.JWT_SECRET
+    const jwtSecret = process.env.JWT_SECRET;
     // Checagem explícita
-    if (jwtSecret === null || jwtSecret === undefined || jwtSecret === '') {
-      console.error('A variável de ambiente JWT_SECRET não está definida.')
-      return response.status(500).json({ error: 'Erro interno do servidor.' })
+    if (jwtSecret === null || jwtSecret === undefined || jwtSecret === "") {
+      console.error("A variável de ambiente JWT_SECRET não está definida.");
+      return response.status(500).json({ error: "Erro interno do servidor." });
     }
 
-    const jwt = await import('jsonwebtoken')
-    const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: '1d' })
+    const jwt = await import("jsonwebtoken");
+    const token = jwt.sign({ userId: user.id }, jwtSecret, { expiresIn: "1d" });
 
-    return response.json({ token })
+    return response.json({ token });
   } catch (error) {
     return response
       .status(500)
-      .json({ error: 'Ocorreu um erro ao fazer login.' })
+      .json({ error: "Ocorreu um erro ao fazer login." });
   }
-})
+});
 
 /**
  * @swagger
@@ -180,7 +212,7 @@ app.post('/login', async (request: Request, response: Response) => {
  *       401:
  *         description: Não autorizado (token inválido ou não fornecido)
  */
-app.get('/me', authMiddleware, async (request: Request, response: Response) => {
+app.get("/me", authMiddleware, async (request: Request, response: Response) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: request.userId },
@@ -189,31 +221,31 @@ app.get('/me', authMiddleware, async (request: Request, response: Response) => {
         nome: true,
         email: true,
         cargo: true,
-        telefone: true
-      }
-    })
+        telefone: true,
+      },
+    });
 
     // Checagem explícita
     if (user === null) {
-      return response.status(404).json({ error: 'Usuário não encontrado.' })
+      return response.status(404).json({ error: "Usuário não encontrado." });
     }
 
-    return response.json(user)
+    return response.json(user);
   } catch (error) {
     return response
       .status(500)
-      .json({ error: 'Ocorreu um erro ao buscar os dados.' })
+      .json({ error: "Ocorreu um erro ao buscar os dados." });
   }
-})
+});
 
 // ROTA DA DOCUMENTAÇÃO SWAGGER
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-const PORT = process.env.PORT ?? 3333
+const PORT = process.env.PORT ?? 3333;
 
 // Inicia o servidor apenas se não estiver em ambiente de teste
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
-    console.log(`🚀 Servidor rodando na porta ${Number(PORT)}`)
-  })
+    console.log(`🚀 Servidor rodando na porta ${Number(PORT)}`);
+  });
 }

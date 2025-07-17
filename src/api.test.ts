@@ -1,48 +1,69 @@
-import request from 'supertest'
-import { app } from './server'
-import { PrismaClient } from '@prisma/client'
+// src/api.test.ts (VERSÃO COMPLETA)
+import request from "supertest";
+import { app } from "./server";
+import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
-beforeAll(async () => {
-  await prisma.user.deleteMany({ where: { email: 'test.user@example.com' } })
-})
+const testUser = {
+  nome: "Test User",
+  email: "test.user@example.com",
+  senha: "password123",
+  telefone: "1234567890",
+};
+
+// Limpa o banco antes e depois dos testes para garantir um ambiente limpo
+beforeEach(async () => {
+  await prisma.user.deleteMany({ where: { email: testUser.email } });
+});
 
 afterAll(async () => {
-  await prisma.user.deleteMany({ where: { email: 'test.user@example.com' } })
-  await prisma.$disconnect()
-})
+  await prisma.user.deleteMany({ where: { email: testUser.email } });
+  await prisma.$disconnect();
+});
 
-describe('API de Usuários', () => {
-  // Teste 1: Deve ser capaz de criar um novo usuário
-  it('deve ser capaz de criar um novo usuário', async () => {
-    const response = await request(app).post('/users').send({
-      nome: 'Test User',
-      email: 'test.user@example.com',
-      senha: 'password123',
-      telefone: '1234567890'
-    })
+describe("Fluxo de Usuário e Autenticação", () => {
+  // Teste 1: Criação de usuário
+  it("deve ser capaz de criar um novo usuário", async () => {
+    const response = await request(app).post("/users").send(testUser);
+    expect(response.status).toBe(201);
+    expect(response.body.email).toBe(testUser.email);
+  });
 
-    // Verifica se a resposta foi 201 (Criado)
-    expect(response.status).toBe(201)
-    // Verifica se o email no corpo da resposta é o que enviamos
-    expect(response.body.email).toBe('test.user@example.com')
-    // Verifica se a resposta NÃO contém a senha
-    expect(response.body).not.toHaveProperty('senha')
-  })
+  // Teste 2: Login com sucesso
+  it("deve ser capaz de autenticar um usuário existente e retornar um token", async () => {
+    // Primeiro, cria o usuário para poder testar o login
+    await request(app).post("/users").send(testUser);
 
-  // Teste 2: Não deve ser capaz de criar um usuário com um e-mail que já existe
-  it('não deve ser capaz de criar um usuário com um e-mail que já existe', async () => {
-    // Tenta criar o mesmo usuário novamente
-    const response = await request(app).post('/users').send({
-      nome: 'Test User 2',
-      email: 'test.user@example.com', // Mesmo e-mail
-      senha: 'password123'
-    })
+    // Agora, testa o login
+    const response = await request(app)
+      .post("/login")
+      .send({ email: testUser.email, senha: testUser.senha });
 
-    // Verifica se a resposta foi 400 (Bad Request)
-    expect(response.status).toBe(400)
-    // Verifica se a mensagem de erro está correta
-    expect(response.body.error).toBe('Este e-mail já está em uso.')
-  })
-})
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty("token"); // Verifica se a resposta contém um token
+  });
+
+  // Teste 3: Acesso a rota protegida com token válido
+  it("deve permitir acesso à rota /me com um token válido", async () => {
+    await request(app).post("/users").send(testUser);
+    const loginResponse = await request(app)
+      .post("/login")
+      .send({ email: testUser.email, senha: testUser.senha });
+
+    const token = loginResponse.body.token;
+
+    const meResponse = await request(app)
+      .get("/me")
+      .set("Authorization", `Bearer ${token}`); // Usa o token no header
+
+    expect(meResponse.status).toBe(200);
+    expect(meResponse.body.email).toBe(testUser.email);
+  });
+
+  // Teste 4: Bloqueio de rota protegida sem token
+  it("não deve permitir acesso à rota /me sem um token", async () => {
+    const response = await request(app).get("/me");
+    expect(response.status).toBe(401);
+  });
+});

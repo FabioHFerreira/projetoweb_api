@@ -12,18 +12,18 @@ O objetivo principal foi atender a todos os requisitos técnicos obrigatórios, 
 
 A API possui os seguintes endpoints:
 
-*   `POST /users`: Cria um novo usuário no sistema.
-*   `POST /login`: Autentica um usuário existente e retorna um token de acesso (JWT).
-*   `GET /me`: Rota protegida que retorna as informações do usuário autenticado (requer token JWT).
-*   `GET /admin/users`: Rota de administrador que retorna todos os usuários cadastrados (requer API Key).
-*   `GET /api-docs`: Apresenta a documentação interativa da API via Swagger.
+- `POST /users`: Cria um novo usuário no sistema.
+- `POST /login`: Autentica um usuário existente e retorna um token de acesso (JWT).
+- `GET /me`: Rota protegida que retorna as informações do usuário autenticado (requer token JWT).
+- `GET /admin/users`: Rota de administrador que retorna todos os usuários cadastrados (requer API Key).
+- `GET /api-docs`: Apresenta a documentação interativa da API via Swagger.
 
 ---
 
 ## 3. Links de Acesso
 
-*   **API Online no Render:** `https://projetoweb-api.onrender.com`
-*   **Documentação Interativa (Swagger ):** `https://projetoweb-api.onrender.com/api-docs`
+- **API Online no Render:** `https://projetoweb-api.onrender.com`
+- **Documentação Interativa (Swagger ):** `https://projetoweb-api.onrender.com/api-docs`
 
 ---
 
@@ -31,32 +31,37 @@ A API possui os seguintes endpoints:
 
 A construção deste projeto envolveu as seguintes tecnologias e ferramentas:
 
-*   **Backend:**
-    *   **Node.js:** Ambiente de execução JavaScript.
-    *   **TypeScript:** Superset do JavaScript que adiciona tipagem estática.
-    *   **Express.js:** Framework para a construção do servidor e das rotas da API.
+- **Backend:**
 
-*   **Banco de Dados e ORM:**
-    *   **PostgreSQL:** Banco de dados relacional.
-    *   **Prisma:** ORM (Object-Relational Mapper ) de última geração para a interação com o banco de dados.
+  - **Node.js:** Ambiente de execução JavaScript.
+  - **TypeScript:** Superset do JavaScript que adiciona tipagem estática.
+  - **Express.js:** Framework para a construção do servidor e das rotas da API.
 
-*   **Autenticação:**
-    *   **JSON Web Tokens (JWT):** Para a criação de tokens de sessão e proteção de rotas de usuário.
-    *   **API Key:** Para a proteção de rotas de administrador.
-    *   **bcrypt.js:** Para a criptografia de senhas (hashing).
+- **Banco de Dados e ORM:**
 
-*   **Testes e Qualidade de Código:**
-    *   **Jest:** Framework para a escrita de testes automatizados.
-    *   **Supertest:** Biblioteca para testar endpoints HTTP.
-    *   **ESLint:** Ferramenta de linting para garantir a consistência e a qualidade do código, utilizando o guia de estilo `Standard with TypeScript`.
+  - **PostgreSQL:** Banco de dados relacional.
+  - **Prisma:** ORM (Object-Relational Mapper ) de última geração para a interação com o banco de dados.
 
-*   **Documentação:**
-    *   **Swagger (OpenAPI):** Para a documentação automática e interativa da API.
+- **Autenticação:**
 
-*   **Ambiente e Deploy:**
-    *   **CodeSandbox:** Ambiente de desenvolvimento em nuvem (Cloud IDE).
-    *   **Render:** Plataforma de nuvem para o deploy da API e do banco de dados PostgreSQL.
-    *   **GitHub:** Para o controle de versão do código.
+  - **JSON Web Tokens (JWT):** Para a criação de tokens de sessão e proteção de rotas de usuário.
+  - **API Key:** Para a proteção de rotas de administrador.
+  - **bcrypt.js:** Para a criptografia de senhas (hashing).
+
+- **Testes e Qualidade de Código:**
+
+  - **Jest:** Framework para a escrita de testes automatizados.
+  - **Supertest:** Biblioteca para testar endpoints HTTP.
+  - **ESLint:** Ferramenta de linting para garantir a consistência e a qualidade do código, utilizando o guia de estilo `Standard with TypeScript`.
+
+- **Documentação:**
+
+  - **Swagger (OpenAPI):** Para a documentação automática e interativa da API.
+
+- **Ambiente e Deploy:**
+  - **CodeSandbox:** Ambiente de desenvolvimento em nuvem (Cloud IDE).
+  - **Render:** Plataforma de nuvem para o deploy da API e do banco de dados PostgreSQL.
+  - **GitHub:** Para o controle de versão do código.
 
 ---
 
@@ -65,26 +70,30 @@ A construção deste projeto envolveu as seguintes tecnologias e ferramentas:
 Para executar o projeto em um ambiente local, siga os passos abaixo:
 
 1.  **Clone o repositório:**
+
     ```bash
     git clone https://github.com/FabioHFerreira/projetoweb_api.git
     cd projetoweb_api
     ```
 
 2.  **Instale as dependências:**
+
     ```bash
     npm install
     ```
 
 3.  **Configure as variáveis de ambiente:**
-    *   Crie um arquivo `.env` na raiz do projeto.
-    *   Adicione as seguintes variáveis, substituindo pelos seus valores:
-        ```
-        DATABASE_URL="sua_url_de_conexao_com_o_postgresql"
-        JWT_SECRET="sua_frase_secreta_para_o_jwt"
-        ADMIN_API_KEY="sua_chave_secreta_para_o_admin"
-        ```
+
+    - Crie um arquivo `.env` na raiz do projeto.
+    - Adicione as seguintes variáveis, substituindo pelos seus valores:
+      ```
+      DATABASE_URL="sua_url_de_conexao_com_o_postgresql"
+      JWT_SECRET="sua_frase_secreta_para_o_jwt"
+      ADMIN_API_KEY="sua_chave_secreta_para_o_admin"
+      ```
 
 4.  **Execute as migrações do banco de dados:**
+
     ```bash
     npx prisma migrate deploy
     ```
@@ -111,7 +120,7 @@ Exemplo de teste da rota de admin com curl:
 
 ```bash
 curl -X GET \
-  -H "X-API-KEY: [SUA-CHAVE-DE-ADMIN-AQUI]" \
+  -H "X-API-KEY: [ADMIN123]" \
   https://projetoweb-api.onrender.com/admin/users
 
 ```
